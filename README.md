@@ -24,5 +24,9 @@ Install Blender_Chemicals
 
 - Press <kbd>N</kbd> key to display properties panel and just use it.
 
+Support
+---
+One can use <https://cactus.nci.nih.gov/cgi-bin/osra/index.cgi> to create smile string.
+
 [^1]: <https://github.com/patrickfuller/blender-chemicals>
 [^2]: <https://conda.io/projects/conda/en/latest/user-guide/install/windows.html>
