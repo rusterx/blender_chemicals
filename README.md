@@ -1,13 +1,13 @@
 # blender_chemicals
 
-blender_chemicals 是一个基于blender-chemicals[^1]的插件，可以用来将SMILE格式的分子转换成3D的结构。但是由于Blender最新版的python的api和以往相差较多，因此blender-chemicals已经无法使用，会产生很多的错误。因此，我将blender-chemicals进行修改，并转换成适应最新Blender的一个插件，其界面如下图所示。
+blender_chemicals 是一个基于blender-chemicals[^1]的插件，可以用来将SMILE格式的分子转换成3D的结构。但是由于Blender最新版的python api和以往相差较多，因此blender-chemicals已经无法使用，会产生很多的错误。因此，我将blender-chemicals进行修改，并转换成适应最新Blender的一个插件，其界面如下图所示。
 
 ![Screenshot of addon](./images/blender_chemicals_screenshot.jpg)
 
 
 安装支持软件
 ---
-这个Blender插件对于smile格式的转换是基于Openbabel的，因此需要安装openbabel，但是这个软件的安装，非常容易出错，因此，推荐严格安装如下的方法进行安装。
+这个Blender插件对于smile格式的转换是基于Openbabel的，因此需要安装openbabel，但是这个软件的安装，非常容易出错，因此，推荐严格按照如下的方法进行安装。
 
 * 安装Anaconda[^2]
 * 使用conda命令安装openbabel
