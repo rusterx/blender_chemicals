@@ -161,9 +161,10 @@ def draw_molecule(molecule, center=(0, 0, 0), show_bonds=True, join=True):
 
 if __name__ == '__main__':
     """Uses Blender's limited argv interface to pass args from main script."""
-    show_bonds, join = True, True
-    PATH = os.path.dirname(os.path.realpath(__file__))
-    json_path = os.path.join(PATH, 'mol.json')
-    with open(json_path) as fid:
-        molecule = json.load(fid)
-    draw_molecule(molecule, show_bonds=show_bonds, join=False)
+    # show_bonds, join = True, True
+    # PATH = os.path.dirname(os.path.realpath(__file__))
+    # json_path = os.path.join(PATH, 'mol.json')
+    # with open(json_path) as fid:
+    #     molecule = json.load(fid)
+    # draw_molecule(molecule, show_bonds=show_bonds, join=False)
+    pass

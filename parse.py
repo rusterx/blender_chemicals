@@ -140,11 +140,11 @@ if __name__ == "__main__":
         print('at least one parameters.')
         sys.exit(1)
 
-    PATH = os.path.dirname(os.path.realpath(__file__))
-    json_path = os.path.join(PATH, 'mol.json')
-
     json_mol = smi_to_mol(sys.argv[1])
     print(json_mol)
-    with open(json_path, 'w') as fid:
-        fid.write(json_mol)
+
+    # PATH = os.path.dirname(os.path.realpath(__file__))
+    # json_path = os.path.join(PATH, 'mol.json')
+    # with open(json_path, 'w') as fid:
+    #     fid.write(json_mol)
 
