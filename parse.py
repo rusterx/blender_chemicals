@@ -144,6 +144,7 @@ if __name__ == "__main__":
     json_path = os.path.join(PATH, 'mol.json')
 
     json_mol = smi_to_mol(sys.argv[1])
+    print(json_mol)
     with open(json_path, 'w') as fid:
         fid.write(json_mol)
 

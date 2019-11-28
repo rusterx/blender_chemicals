@@ -8,6 +8,7 @@ import bpy
 import json
 from .draw import draw_molecule
 
+
 from bpy.props import (StringProperty,
                        BoolProperty,
                        IntProperty,
@@ -22,14 +23,19 @@ from bpy.types import (Panel,
                        PropertyGroup,)
 
 
-
 class PG_MyProperties (PropertyGroup):
     # 字符串界面
-    smile_string : StringProperty(
+    smile_string: StringProperty(
         name="Smi",
-        description=":",
+        description="",
         default="",
         maxlen=2048,
+    )
+
+    join_structure: BoolProperty(
+        name="Join Structure",
+        description="",
+        default=True
     )
 
 
@@ -47,16 +53,26 @@ class OT_DrawChemicalStructureOperator (bpy.types.Operator):
         # suppose create mol.json after parse command
         parse_path = os.path.join(script_path, 'parse.py')
         parse_command = ['python', parse_path, mytool.smile_string]
-        subprocess.Popen(parse_command)
 
-        # draw molecule
-        show_bonds, join = True, True
-        PATH = os.path.dirname(os.path.realpath(__file__))
-        json_path = os.path.join(PATH, 'mol.json')
+        try:
+            subprocess.Popen(parse_command)
+            json_mol = subprocess.check_output(parse_command)
+            # remove output format string
+            clean_mol_json = str(json_mol.decode('utf8').strip()).strip('b')
 
-        with open(json_path) as fid:
-            molecule = json.load(fid)
-        draw_molecule(molecule, show_bonds=show_bonds, join=join)
+            # draw molecule
+            show_bonds, join = True, False
+            # PATH = os.path.dirname(os.path.realpath(__file__))
+            # json_path = os.path.join(PATH, 'mol.json')
+
+            molecule = json.loads(clean_mol_json)
+            # with open(json_path) as fid:
+            #     molecule = json.load(fid)
+            draw_molecule(molecule, show_bonds=show_bonds, join=mytool.join_structure)
+
+        except:
+            print('Blender Chemical Parse Error.')
+            os.exit(1)
 
         return {'FINISHED'}
 
@@ -83,4 +99,5 @@ class OBJECT_PT_setting_panel (Panel):
         mytool = scene.my_tool
         # 绘制界面
         layout.prop(mytool, "smile_string")
+        layout.prop(mytool, "join_structure")
         layout.operator("wm.draw_chemical_structure")

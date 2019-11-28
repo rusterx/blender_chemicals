@@ -68,6 +68,7 @@ def draw_molecule(molecule, center=(0, 0, 0), show_bonds=True, join=True):
         cylinder = bpy.context.object
         cylinder.active_material = bpy.data.materials['bond']
 
+    # draw atoms
     for atom in molecule['atoms']:
         if atom['element'] not in atom_data:
             atom['element'] = 'undefined'
@@ -89,6 +90,7 @@ def draw_molecule(molecule, center=(0, 0, 0), show_bonds=True, join=True):
         bpy.context.collection.objects.link(atom_sphere)
         shapes.append(atom_sphere)
 
+    # draw bonds
     for bond in (molecule['bonds'] if show_bonds else []):
         start = molecule['atoms'][bond['atoms'][0]]['location']
         end = molecule['atoms'][bond['atoms'][1]]['location']
@@ -164,4 +166,4 @@ if __name__ == '__main__':
     json_path = os.path.join(PATH, 'mol.json')
     with open(json_path) as fid:
         molecule = json.load(fid)
-    draw_molecule(molecule, show_bonds=show_bonds, join=join)
+    draw_molecule(molecule, show_bonds=show_bonds, join=False)
