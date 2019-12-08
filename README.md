@@ -1,5 +1,7 @@
 # blender_chemicals
 
+edit version: https://e.coding.net/nino/blender_chemicals.git
+
 blender_chemicals 是一个基于blender-chemicals[^1]的插件，可以用来将SMILE格式的分子转换成3D的结构。但是由于Blender最新版的python api和以往相差较多，因此blender-chemicals已经无法使用，会产生很多的错误。因此，我将blender-chemicals进行修改，并转换成适应最新Blender的一个插件，其界面如下图所示。
 
 ![Screenshot of addon](./images/blender_chemicals_screenshot.jpg)
