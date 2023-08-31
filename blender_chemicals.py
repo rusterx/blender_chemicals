@@ -4,26 +4,31 @@
 
 import subprocess
 import os
+import sys
 import bpy
 import json
 from .draw import draw_molecule
 
 
-from bpy.props import (StringProperty,
-                       BoolProperty,
-                       IntProperty,
-                       FloatProperty,
-                       FloatVectorProperty,
-                       EnumProperty,
-                       PointerProperty,)
+from bpy.props import (
+    StringProperty,
+    BoolProperty,
+    IntProperty,
+    FloatProperty,
+    FloatVectorProperty,
+    EnumProperty,
+    PointerProperty,
+)
 
-from bpy.types import (Panel,
-                       AddonPreferences,
-                       Operator,
-                       PropertyGroup,)
+from bpy.types import (
+    Panel,
+    AddonPreferences,
+    Operator,
+    PropertyGroup,
+)
 
 
-class PG_MyProperties (PropertyGroup):
+class PG_MyProperties(PropertyGroup):
     # 字符串界面
     smile_string: StringProperty(
         name="Smi",
@@ -32,14 +37,10 @@ class PG_MyProperties (PropertyGroup):
         maxlen=2048,
     )
 
-    join_structure: BoolProperty(
-        name="Join Structure",
-        description="",
-        default=True
-    )
+    join_structure: BoolProperty(name="Join Structure", description="", default=True)
 
 
-class OT_DrawChemicalStructureOperator (bpy.types.Operator):
+class OT_DrawChemicalStructureOperator(bpy.types.Operator):
     bl_idname = "wm.draw_chemical_structure"
     bl_label = "Draw Structure"
 
@@ -51,14 +52,14 @@ class OT_DrawChemicalStructureOperator (bpy.types.Operator):
         script_path = os.path.dirname(os.path.realpath(__file__))
 
         # suppose create mol.json after parse command
-        parse_path = os.path.join(script_path, 'parse.py')
-        parse_command = ['python', parse_path, mytool.smile_string]
+        parse_path = os.path.join(script_path, "parse.py")
+        parse_command = ["python", parse_path, mytool.smile_string]
 
         try:
             subprocess.Popen(parse_command)
             json_mol = subprocess.check_output(parse_command)
             # remove output format string
-            clean_mol_json = str(json_mol.decode('utf8').strip()).strip('b')
+            clean_mol_json = str(json_mol.decode("utf8").strip()).strip("b")
 
             # draw molecule
             show_bonds, join = True, False
@@ -71,13 +72,13 @@ class OT_DrawChemicalStructureOperator (bpy.types.Operator):
             draw_molecule(molecule, show_bonds=show_bonds, join=mytool.join_structure)
 
         except:
-            print('Blender Chemical Parse Error.')
-            os.exit(1)
+            print("Blender Chemical Parse Error.")
+            sys.exit(1)
 
-        return {'FINISHED'}
+        return {"FINISHED"}
 
 
-class OBJECT_PT_setting_panel (Panel):
+class OBJECT_PT_setting_panel(Panel):
     # 用户输入设置面板，此处用于输入Smile字符串
     bl_idname = "OBJECT_PT_setting_panel"
     bl_label = "Setting Panel"
@@ -90,7 +91,7 @@ class OBJECT_PT_setting_panel (Panel):
     bl_context = "objectmode"
 
     @classmethod
-    def poll(self,context):
+    def poll(self, context):
         return context.object is not None
 
     def draw(self, context):
