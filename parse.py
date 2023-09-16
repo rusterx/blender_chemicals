@@ -6,12 +6,12 @@ import json
 from itertools import takewhile
 import sys
 import os
-import pybel
-ob = pybel.ob
+
+from openbabel import pybel
+from openbabel import openbabel as ob
 
 
-def process(mol, hydrogens=True, generate_coords=True,
-            infer_bonds=True, pretty=False):
+def process(mol, hydrogens=True, generate_coords=True, infer_bonds=True, pretty=False):
     """Performs a number of standard edits, then outputs simplified JSON.
 
     Args:
@@ -50,38 +50,49 @@ def process(mol, hydrogens=True, generate_coords=True,
     if pretty:
         json_obj = json.dumps(obj, indent=4, sort_keys=True, cls=CustomEncoder)
     else:
-        json_obj = json.dumps(obj, separators=(',', ':'))
+        json_obj = json.dumps(obj, separators=(",", ":"))
     return json_obj
 
 
 def _pybel_to_object(molecule):
     """Converts a pybel molecule to json."""
-    table = pybel.ob.OBElementTable()
-    atoms = [{'element': table.GetSymbol(atom.atomicnum),
-              'location': [float('{:.5f}'.format(c)) for c in atom.coords]}
-             for atom in molecule.atoms]
-    bonds = [{'atoms': [b.GetBeginAtom().GetIndex(),
-                        b.GetEndAtom().GetIndex()],
-              'order': b.GetBondOrder()}
-             for b in ob.OBMolBondIter(molecule.OBMol)]
-    return {'atoms': atoms, 'bonds': bonds}
+    # https://github.com/patrickfuller/imolecule/blob/master/imolecule/format_converter.py#L140
+    # somes code should be edited here
+    atoms = [
+        {
+            "element": ob.GetSymbol(atom.atomicnum),
+            "location": [float("{:.5f}".format(c)) for c in atom.coords],
+        }
+        for atom in molecule.atoms
+    ]
+    bonds = [
+        {
+            "atoms": [b.GetBeginAtom().GetIndex(), b.GetEndAtom().GetIndex()],
+            "order": b.GetBondOrder(),
+        }
+        for b in ob.OBMolBondIter(molecule.OBMol)
+    ]
+    return {"atoms": atoms, "bonds": bonds}
 
 
 class CustomEncoder(json.JSONEncoder):
     """Some small edits to pretty-printed json output.
 
-     * Float decimals are truncated to six digits
-     * [x, y, z] vectors are displayed on one line
-     * Converts numpy arrays to lists and defined objects to dictionaries
-     * Atoms and bonds are on one line each (looks more like other formats)
+    * Float decimals are truncated to six digits
+    * [x, y, z] vectors are displayed on one line
+    * Converts numpy arrays to lists and defined objects to dictionaries
+    * Atoms and bonds are on one line each (looks more like other formats)
     """
+
     def default(self, obj):
         """Fired when an unserializable object is hit."""
-        if hasattr(obj, '__dict__'):
+        if hasattr(obj, "__dict__"):
             return obj.__dict__.copy()
         else:
-            raise TypeError(("Object of type %s with value of %s is not JSON "
-                            "serializable") % (type(obj), repr(obj)))
+            raise TypeError(
+                ("Object of type %s with value of %s is not JSON " "serializable")
+                % (type(obj), repr(obj))
+            )
 
     def encode(self, obj):
         """Fired for every object."""
@@ -96,48 +107,52 @@ class CustomEncoder(json.JSONEncoder):
         is_compressing = False
         compressed = []
         spaces = 0
-        for row in json_string.split('\n'):
+        for row in json_string.split("\n"):
             if is_compressing:
-                if row.strip() == '{':
+                if row.strip() == "{":
                     compressed.append(row.rstrip())
-                elif (len(row) > spaces and row[:spaces] == ' ' * spaces and
-                        row[spaces:].rstrip() in [']', '],']):
+                elif (
+                    len(row) > spaces
+                    and row[:spaces] == " " * spaces
+                    and row[spaces:].rstrip() in ["]", "],"]
+                ):
                     compressed.append(row.rstrip())
                     is_compressing = False
                 else:
-                    compressed[-1] += ' ' + row.strip()
+                    compressed[-1] += " " + row.strip()
             else:
                 compressed.append(row.rstrip())
-                if any(a in row for a in ['atoms', 'bonds']):
+                if any(a in row for a in ["atoms", "bonds"]):
                     # Fix to handle issues that arise with empty lists
-                    if '[]' in row:
+                    if "[]" in row:
                         continue
                     spaces = sum(1 for _ in takewhile(str.isspace, row))
                     is_compressing = True
-        return '\n'.join(compressed)
+        return "\n".join(compressed)
 
 
 def smi_to_mol(smile_string):
-    mol = pybel.readstring('smi', smile_string)
+    mol = pybel.readstring("smi", smile_string)
     args = {
-        'hydrogens': True,
-        'generate_coords': True,
-        'infer_bonds': True,
-        'convert_only': False
+        "hydrogens": True,
+        "generate_coords": True,
+        "infer_bonds": True,
+        "convert_only": False,
     }
 
-    json_mol = process(mol,
-                       args['hydrogens'],
-                       args['generate_coords'],
-                       args['infer_bonds'],
-                       args['convert_only']
-               )
+    json_mol = process(
+        mol,
+        args["hydrogens"],
+        args["generate_coords"],
+        args["infer_bonds"],
+        args["convert_only"],
+    )
     return json_mol
 
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
-        print('at least one parameters.')
+        print("at least one parameters.")
         sys.exit(1)
 
     json_mol = smi_to_mol(sys.argv[1])
@@ -147,4 +162,3 @@ if __name__ == "__main__":
     # json_path = os.path.join(PATH, 'mol.json')
     # with open(json_path, 'w') as fid:
     #     fid.write(json_mol)
-

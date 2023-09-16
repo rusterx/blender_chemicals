@@ -1,7 +1,7 @@
-#!/usr/bin/python
-# -*- coding=utf-8 -*-
+# -*- coding: utf-8 -*-
 
 
+import traceback
 import subprocess
 import os
 import sys
@@ -28,6 +28,7 @@ from bpy.types import (
 )
 
 
+# this class is used to define setting
 class PG_MyProperties(PropertyGroup):
     # 字符串界面
     smile_string: StringProperty(
@@ -45,21 +46,45 @@ class OT_DrawChemicalStructureOperator(bpy.types.Operator):
     bl_label = "Draw Structure"
 
     def execute(self, context):
-        scene = context.scene
-        mytool = scene.my_tool
-        # mytool.smile_string
-
-        script_path = os.path.dirname(os.path.realpath(__file__))
-
-        # suppose create mol.json after parse command
-        parse_path = os.path.join(script_path, "parse.py")
-        parse_command = ["python", parse_path, mytool.smile_string]
-
         try:
-            subprocess.Popen(parse_command)
-            json_mol = subprocess.check_output(parse_command)
+            scene = context.scene
+            mytool = scene.my_tool
+            # mytool.smile_string
+
+            script_path = os.path.dirname(os.path.realpath(__file__))
+
+            # suppose create mol.json after parse command
+            # you can run parse.py in your environment, and args should be changed by different computer
+            # TODO: many error occured here.
+            parse_path = os.path.join(script_path, "parse.py")
+            args = [
+                "call",
+                "conda",
+                "activate",
+                "base",
+                "&&",
+                "python",
+                parse_path,
+                mytool.smile_string,
+            ]
+
+            result = subprocess.run(args, capture_output=True, shell=True)
+            import chardet
+
+            if result.returncode != 0:
+                charinfo = chardet.detect(result.stderr)
+                raise Exception(result.stderr.decode(charinfo["encoding"]).strip())
+            else:
+                charinfo = chardet.detect(result.stdout)
+                clean_mol_json = result.stdout.decode(charinfo["encoding"]).strip()
+
+            # json_mol = subprocess.check_output(args)
             # remove output format string
-            clean_mol_json = str(json_mol.decode("utf8").strip()).strip("b")
+            # clean_mol_json = str(json_mol.decode("utf8").strip()).strip("b")
+
+            # to print the real output you can
+            # print(clean_mol_json.encode('utf-8'))
+            clean_mol_json = clean_mol_json.splitlines()[-1]
 
             # draw molecule
             show_bonds, join = True, False
@@ -71,9 +96,8 @@ class OT_DrawChemicalStructureOperator(bpy.types.Operator):
             #     molecule = json.load(fid)
             draw_molecule(molecule, show_bonds=show_bonds, join=mytool.join_structure)
 
-        except:
-            print("Blender Chemical Parse Error.")
-            sys.exit(1)
+        except Exception as ex:
+            traceback.print_exc()
 
         return {"FINISHED"}
 
